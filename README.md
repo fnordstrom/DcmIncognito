@@ -6,7 +6,7 @@ An easy to use program with drag-and-drop functionality for batch anonymization 
 
 ![User interface](https://github.com/fnordstrom/DcmIncognito/blob/master/DcmIncognito/Images/Screenshot.png)
 
-Compiled binaries using are located in the `Binaries` folder.
+Compiled binaries are located in the `Binaries` folder.
 
 ## Disclamer
 
