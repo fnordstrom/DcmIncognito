@@ -33,6 +33,8 @@
             this.buttonOk = new System.Windows.Forms.Button();
             this.checkBoxAlwaysAskForNameAndId = new System.Windows.Forms.CheckBox();
             this.checkBoxAlwaysAskForOutputFolder = new System.Windows.Forms.CheckBox();
+            this.checkBoxOverwriteFiles = new System.Windows.Forms.CheckBox();
+            this.checkBoxIgnoreFilesWithoutDCMExtension = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // checkBoxShowToolTips
@@ -47,8 +49,9 @@
             // 
             // buttonCancel
             // 
+            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(86, 101);
+            this.buttonCancel.Location = new System.Drawing.Point(86, 147);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 7;
@@ -57,8 +60,9 @@
             // 
             // buttonOk
             // 
+            this.buttonOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.buttonOk.Location = new System.Drawing.Point(167, 101);
+            this.buttonOk.Location = new System.Drawing.Point(167, 147);
             this.buttonOk.Name = "buttonOk";
             this.buttonOk.Size = new System.Drawing.Size(75, 23);
             this.buttonOk.TabIndex = 6;
@@ -66,11 +70,11 @@
             this.buttonOk.UseVisualStyleBackColor = true;
             this.buttonOk.Click += new System.EventHandler(this.ButtonOk_Click);
             // 
-            // checkBoxAlwaysAskForPatientData
+            // checkBoxAlwaysAskForNameAndId
             // 
             this.checkBoxAlwaysAskForNameAndId.AutoSize = true;
             this.checkBoxAlwaysAskForNameAndId.Location = new System.Drawing.Point(12, 35);
-            this.checkBoxAlwaysAskForNameAndId.Name = "checkBoxAlwaysAskForPatientData";
+            this.checkBoxAlwaysAskForNameAndId.Name = "checkBoxAlwaysAskForNameAndId";
             this.checkBoxAlwaysAskForNameAndId.Size = new System.Drawing.Size(153, 17);
             this.checkBoxAlwaysAskForNameAndId.TabIndex = 8;
             this.checkBoxAlwaysAskForNameAndId.Text = "Always ask for patient data";
@@ -85,6 +89,28 @@
             this.checkBoxAlwaysAskForOutputFolder.TabIndex = 9;
             this.checkBoxAlwaysAskForOutputFolder.Text = "Always ask for output folder";
             this.checkBoxAlwaysAskForOutputFolder.UseVisualStyleBackColor = true;
+            this.checkBoxAlwaysAskForOutputFolder.CheckedChanged += new System.EventHandler(this.CheckBox_CheckedChanged);
+            // 
+            // checkBoxOverwriteFiles
+            // 
+            this.checkBoxOverwriteFiles.AutoSize = true;
+            this.checkBoxOverwriteFiles.Location = new System.Drawing.Point(12, 81);
+            this.checkBoxOverwriteFiles.Name = "checkBoxOverwriteFiles";
+            this.checkBoxOverwriteFiles.Size = new System.Drawing.Size(92, 17);
+            this.checkBoxOverwriteFiles.TabIndex = 10;
+            this.checkBoxOverwriteFiles.Text = "Overwrite files";
+            this.checkBoxOverwriteFiles.UseVisualStyleBackColor = true;
+            this.checkBoxOverwriteFiles.CheckedChanged += new System.EventHandler(this.CheckBox_CheckedChanged);
+            // 
+            // checkBoxIgnoreNoneDCMFiles
+            // 
+            this.checkBoxIgnoreFilesWithoutDCMExtension.AutoSize = true;
+            this.checkBoxIgnoreFilesWithoutDCMExtension.Location = new System.Drawing.Point(12, 104);
+            this.checkBoxIgnoreFilesWithoutDCMExtension.Name = "checkBoxIgnoreNoneDCMFiles";
+            this.checkBoxIgnoreFilesWithoutDCMExtension.Size = new System.Drawing.Size(188, 17);
+            this.checkBoxIgnoreFilesWithoutDCMExtension.TabIndex = 11;
+            this.checkBoxIgnoreFilesWithoutDCMExtension.Text = "Ignore files without .dcm extension";
+            this.checkBoxIgnoreFilesWithoutDCMExtension.UseVisualStyleBackColor = true;
             // 
             // AdvancedSettings
             // 
@@ -92,7 +118,9 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.buttonCancel;
-            this.ClientSize = new System.Drawing.Size(254, 136);
+            this.ClientSize = new System.Drawing.Size(254, 182);
+            this.Controls.Add(this.checkBoxIgnoreFilesWithoutDCMExtension);
+            this.Controls.Add(this.checkBoxOverwriteFiles);
             this.Controls.Add(this.checkBoxAlwaysAskForOutputFolder);
             this.Controls.Add(this.checkBoxAlwaysAskForNameAndId);
             this.Controls.Add(this.buttonCancel);
@@ -117,5 +145,7 @@
         private System.Windows.Forms.Button buttonOk;
         private System.Windows.Forms.CheckBox checkBoxAlwaysAskForNameAndId;
         private System.Windows.Forms.CheckBox checkBoxAlwaysAskForOutputFolder;
+        private System.Windows.Forms.CheckBox checkBoxOverwriteFiles;
+        private System.Windows.Forms.CheckBox checkBoxIgnoreFilesWithoutDCMExtension;
     }
 }

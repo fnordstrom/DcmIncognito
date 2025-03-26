@@ -64,7 +64,8 @@ namespace DcmIncognito
         {
             string fullPath = Path.GetFullPath(path);
 
-            if (dicomFiles.FirstOrDefault(dcm => fullPath.Equals(dcm.FullPath)) is null) // Check if the file has not yet been added
+            if ((!Settings.Default.IgnoreFilesWithoutDCMExtension || Path.GetExtension(path).Equals(".dcm", StringComparison.OrdinalIgnoreCase)) &&
+                dicomFiles.FirstOrDefault(dcm => fullPath.Equals(dcm.FullPath)) is null) // Check if the file has not yet been added
             {                
                 CurrentDirectory = Path.GetDirectoryName(path);
                 dicomFiles.Add(new DICOMFile(fullPath));                
@@ -138,6 +139,7 @@ namespace DcmIncognito
             try
             {
                 DICOMFile[] filesToRead = dicomFiles.Where(dcm => !dcm.Invalid && dcm.DICOMObject is null).ToArray();
+
                 for (int fileNr = 0; fileNr < filesToRead.Length; fileNr++)
                 {
                     if (backgroundWorkerReadFiles.CancellationPending)
@@ -150,7 +152,7 @@ namespace DcmIncognito
                     string modality = dicomFile.Read();
                     if (dicomFile.Invalid)
                         modality = "INVALID";
-
+                    
                     if (!string.IsNullOrEmpty(modality))
                     {
                         if (!numberOfModalities.ContainsKey(modality))
@@ -176,89 +178,99 @@ namespace DcmIncognito
             try
             {
                 AnonymizationSettings settings = e.Argument as AnonymizationSettings;
-
-                EvilDICOM.Anonymization.Settings.AnonymizationSettings evilDICOMAnonymizationConfiguration = new EvilDICOM.Anonymization.Settings.AnonymizationSettings()
-                {
-                    FirstName = settings.FirstName,
-                    LastName = settings.LastName,
-                    Id = settings.Id,
-
-                    DoAnonymizeUIDs = Settings.Default.GenerateNewUIDs,
-
-                    DoAnonymizeNames = Settings.Default.AnynomizeNames,
-                    DoAnonymizeStudyIDs = Settings.Default.AnonymizeStudyIDs,
-                    DateSettings = Settings.Default.AnonymizeDates && Enum.TryParse(Settings.Default.DateSettings, out DateSettings dateSettings) ? dateSettings : DateSettings.KEEP_ALL_DATES,
-                    DoRemovePrivateTags = false, // Doesn't work. Implemented it in another way.
-                    DoDICOMProfile = Settings.Default.ClearStandardIdentificationProfile
-                };
-
-                bool removePrivateTags = Settings.Default.RemovePrivateTags;
-                bool removeSetupNote = true;
-
-                backgroundAnonymize.ReportProgress(0, $"Building queue...");
-                IEnumerable<DICOMFile> filesForExport = dicomFiles.Where(x => !x.Invalid);
-                AnonymizationQueue anonymizationQueue = AnonymizationQueue.BuildQueue(evilDICOMAnonymizationConfiguration, filesForExport.Select(x => x.FullPath));
-
-
-                for (int fileNr = 0; fileNr < filesForExport.Count(); fileNr++)
+                
+                string[] uniquePatientIds = settings.Random ? dicomFiles.Where(x => !x.Invalid).Select(x => x.PatientId.ToLower()).Distinct().ToArray() : new string[] { "All" };
+                int numberOfFiles = dicomFiles.Where(x => !x.Invalid).Count();
+                int numberOfProcessedFiles = 0;
+                foreach (string patientId in uniquePatientIds) 
                 {
                     if (backgroundAnonymize.CancellationPending)
                         break;
 
-                    backgroundAnonymize.ReportProgress((int)Math.Round(100 * (double)fileNr / filesForExport.Count()), $"Anonymizing {Path.GetFileName(filesForExport.ElementAt(fileNr).FullPath)}");
-
-                    string modality = filesForExport.ElementAt(fileNr).Modality;
-                    DICOMObject dicomObject = filesForExport.ElementAt(fileNr).DICOMObject;
-
-                    anonymizationQueue.Anonymize(dicomObject);
-
-                    string prefix;
-                    switch (modality)
+                    (string id, string firstName, string lastName) = settings.Random ? Randomizer.Get(patientId) : (settings.Id, settings.FirstName, settings.LastName);
+                    EvilDICOM.Anonymization.Settings.AnonymizationSettings evilDICOMAnonymizationConfiguration = new EvilDICOM.Anonymization.Settings.AnonymizationSettings()
                     {
-                        case "RTPLAN":
-                            prefix = "RP.";
-                            break;
-                        case "RTDOSE":
-                            prefix = "RD.";
-                            break;
-                        case "RTSTRUCT":
-                            prefix = "RS.";
-                            break;
-                        case "RTIMAGE":
-                            prefix = "RI.";
-                            break;
-                        default:
-                            prefix = $"{modality}.";
-                            break;
-                    }
+                        FirstName = firstName,
+                        LastName = lastName,
+                        Id = id,
 
-                    if (removePrivateTags)
+                        DoAnonymizeUIDs = Settings.Default.GenerateNewUIDs,
+
+                        DoAnonymizeNames = Settings.Default.AnynomizeNames,
+                        DoAnonymizeStudyIDs = Settings.Default.AnonymizeStudyIDs,
+                        DateSettings = Settings.Default.AnonymizeDates && Enum.TryParse(Settings.Default.DateSettings, out DateSettings dateSettings) ? dateSettings : DateSettings.KEEP_ALL_DATES,
+                        DoRemovePrivateTags = false, // Doesn't work. Implemented it in another way.
+                        DoDICOMProfile = Settings.Default.ClearStandardIdentificationProfile
+                    };
+
+                    bool removePrivateTags = Settings.Default.RemovePrivateTags;
+                    bool removeSetupNote = true;
+
+                    backgroundAnonymize.ReportProgress((int)Math.Round(100 * (double)numberOfProcessedFiles / numberOfFiles), $"Building queue...");
+                    IEnumerable<DICOMFile> filesForExport = settings.Random ? dicomFiles.Where(x => !x.Invalid && x.PatientId.ToLower().Equals(patientId)) : dicomFiles.Where(x => !x.Invalid);
+                    AnonymizationQueue anonymizationQueue = AnonymizationQueue.BuildQueue(evilDICOMAnonymizationConfiguration, filesForExport.Select(x => x.FullPath));
+
+                    foreach(DICOMFile file in filesForExport)
                     {
-                        IDICOMElement[] privateElements = dicomObject.AllElements.Where(x => x.Tag.IsPrivate()).ToArray();
-                        for (int i = privateElements.Length - 1; i >= 0; i--)
-                            dicomObject.Remove(privateElements[i].Tag);
+                        if (backgroundAnonymize.CancellationPending)
+                            break;
+
+                        backgroundAnonymize.ReportProgress((int)Math.Round(100 * (double)numberOfProcessedFiles / numberOfFiles), $"Anonymizing {Path.GetFileName(file.FullPath)}");
+
+                        string modality = file.Modality;
+                        DICOMObject dicomObject = file.DICOMObject;
+
+                        anonymizationQueue.Anonymize(dicomObject);
+
+                        string prefix;
+                        switch (modality)
+                        {
+                            case "RTPLAN":
+                                prefix = "RP.";
+                                break;
+                            case "RTDOSE":
+                                prefix = "RD.";
+                                break;
+                            case "RTSTRUCT":
+                                prefix = "RS.";
+                                break;
+                            case "RTIMAGE":
+                                prefix = "RI.";
+                                break;
+                            default:
+                                prefix = $"{modality}.";
+                                break;
+                        }
+
+                        if (removePrivateTags)
+                        {
+                            IDICOMElement[] privateElements = dicomObject.AllElements.Where(x => x.Tag.IsPrivate()).ToArray();
+                            for (int i = privateElements.Length - 1; i >= 0; i--)
+                                dicomObject.Remove(privateElements[i].Tag);
+                        }
+
+                        if (removeSetupNote)
+                        {
+                            IDICOMElement[] setupTechniqueDescriptionElements = dicomObject.FindAll(TagHelper.SetupTechniqueDescription).ToArray();
+                            for (int i = setupTechniqueDescriptionElements.Length - 1; i >= 0; i--)
+                                dicomObject.Remove(setupTechniqueDescriptionElements[i].Tag);
+                        }
+
+                        string sopInstanceUID = (dicomObject.FindFirst(TagHelper.SOPInstanceUID) as UniqueIdentifier)?.Data;
+
+                        string outputPath = Settings.Default.OverwriteFiles ? file.FullPath : Path.Combine(settings.OutputDirectory, $"{prefix}{sopInstanceUID}.dcm");
+                        file.Write(outputPath);
+
+                        if (numberOfModalities.ContainsKey(modality))
+                        {
+                            numberOfModalities[modality]--;
+                            if (numberOfModalities[modality] == 0)
+                                numberOfModalities.Remove(modality);
+                        }
+
+                        numberOfProcessedFiles++;
+                        backgroundAnonymize.ReportProgress((int)Math.Round(100 * (double)numberOfProcessedFiles / numberOfFiles), numberOfModalities.ToArray());
                     }
-
-                    if (removeSetupNote)
-                    {
-                        IDICOMElement[] setupTechniqueDescriptionElements = dicomObject.FindAll(TagHelper.SetupTechniqueDescription).ToArray();
-                        for (int i = setupTechniqueDescriptionElements.Length - 1; i >= 0; i--)
-                            dicomObject.Remove(setupTechniqueDescriptionElements[i].Tag);
-                    }
-
-                    string sopInstanceUID = (dicomObject.FindFirst(TagHelper.SOPInstanceUID) as UniqueIdentifier)?.Data;
-
-                    string outputPath = Path.Combine(settings.OutputDirectory, $"{prefix}{sopInstanceUID}.dcm");                    
-                    dicomFiles.ElementAt(fileNr).Write(outputPath);
-
-                    if (numberOfModalities.ContainsKey(modality))
-                    {
-                        numberOfModalities[modality]--;
-                        if (numberOfModalities[modality] ==0)
-                            numberOfModalities.Remove(modality);
-                    }
-
-                    backgroundAnonymize.ReportProgress((int)Math.Round(100 * (double)fileNr / filesForExport.Count()), numberOfModalities.ToArray());
                 }
             }
             catch(Exception exception)

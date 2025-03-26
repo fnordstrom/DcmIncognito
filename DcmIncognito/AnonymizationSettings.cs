@@ -15,6 +15,7 @@ namespace DcmIncognito
         public string Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public bool Random { get; set; }
         public string OutputDirectory { get; set; }
 
         public string GetShortOutputDirectory()

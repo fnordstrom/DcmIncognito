@@ -36,6 +36,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.buttonOk = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
+            this.checkBoxRandom = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // label1
@@ -93,7 +94,7 @@
             // 
             this.buttonOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.buttonOk.Location = new System.Drawing.Point(263, 128);
+            this.buttonOk.Location = new System.Drawing.Point(263, 174);
             this.buttonOk.Name = "buttonOk";
             this.buttonOk.Size = new System.Drawing.Size(75, 23);
             this.buttonOk.TabIndex = 4;
@@ -105,12 +106,23 @@
             // 
             this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(182, 128);
+            this.buttonCancel.Location = new System.Drawing.Point(182, 174);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 5;
             this.buttonCancel.Text = "Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxRandom
+            // 
+            this.checkBoxRandom.AutoSize = true;
+            this.checkBoxRandom.Location = new System.Drawing.Point(15, 129);
+            this.checkBoxRandom.Name = "checkBoxRandom";
+            this.checkBoxRandom.Size = new System.Drawing.Size(66, 17);
+            this.checkBoxRandom.TabIndex = 3;
+            this.checkBoxRandom.Text = "Random";
+            this.checkBoxRandom.UseVisualStyleBackColor = true;
+            this.checkBoxRandom.CheckedChanged += new System.EventHandler(this.TextBox_TextChanged);
             // 
             // AnonymizationWindow
             // 
@@ -118,7 +130,8 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.buttonCancel;
-            this.ClientSize = new System.Drawing.Size(350, 163);
+            this.ClientSize = new System.Drawing.Size(350, 209);
+            this.Controls.Add(this.checkBoxRandom);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonOk);
             this.Controls.Add(this.textBoxLastName);
@@ -149,5 +162,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button buttonOk;
         private System.Windows.Forms.Button buttonCancel;
+        private System.Windows.Forms.CheckBox checkBoxRandom;
     }
 }

@@ -15,6 +15,7 @@ namespace DcmIncognito
             textBoxId.Text = anonymizationSettings.Id;
             textBoxFirstName.Text = anonymizationSettings.FirstName;
             textBoxLastName.Text = anonymizationSettings.LastName;
+            checkBoxRandom.Checked = anonymizationSettings.Random;
 
             TextBox_TextChanged(null, null);
         }
@@ -24,11 +25,16 @@ namespace DcmIncognito
             anonymizationSettings.Id = textBoxId.Text;
             anonymizationSettings.FirstName = textBoxFirstName.Text;
             anonymizationSettings.LastName = textBoxLastName.Text;
+            anonymizationSettings.Random = checkBoxRandom.Checked;
         }
 
         private void TextBox_TextChanged(object sender, EventArgs e)
         {
-            buttonOk.Enabled = textBoxId.Text.Length > 0 && textBoxFirstName.Text.Length > 0 && textBoxLastName.Text.Length > 0;
+            textBoxId.Enabled = !checkBoxRandom.Checked;
+            textBoxFirstName.Enabled = !checkBoxRandom.Checked;
+            textBoxLastName.Enabled = !checkBoxRandom.Checked;
+
+            buttonOk.Enabled = (textBoxId.Text.Length > 0 && textBoxFirstName.Text.Length > 0 && textBoxLastName.Text.Length > 0) || checkBoxRandom.Checked;
         }
     }
 }

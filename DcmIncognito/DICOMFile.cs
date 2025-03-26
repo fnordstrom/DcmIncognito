@@ -147,5 +147,6 @@ namespace DcmIncognito
         /// The SOP instance UID
         /// </summary>
         public string SOPInstanceUID { get { return (dicomObject.FindFirst(TagHelper.SOPInstanceUID) as UniqueIdentifier).Data; } }
+        public string PatientId { get { return (dicomObject.FindFirst(TagHelper.PatientID) as LongString).Data; } }
     }
 }

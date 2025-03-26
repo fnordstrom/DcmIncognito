@@ -378,7 +378,7 @@ namespace DcmIncognito
                 }
             }
 
-            if(Settings.Default.AlwaysAskForOutputDirectory || string.IsNullOrEmpty(anonymizationSettings.OutputDirectory))
+            if(!Settings.Default.OverwriteFiles && (Settings.Default.AlwaysAskForOutputDirectory || string.IsNullOrEmpty(anonymizationSettings.OutputDirectory)))
             {
                 TopMost = false;
 
